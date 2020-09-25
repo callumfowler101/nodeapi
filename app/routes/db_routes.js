@@ -2,17 +2,19 @@
  const cryptoRandomString = require('crypto-random-string')
 
 module.exports = function(app, db){
-    app.get('/form', (req, res)=>{
+    app.get('/form/:type/:medium/:start_date/:end_date', (req, res)=>{
 
-        let sd = new Date(req.body.start_date);
-        let ed = new Date (req.body.end_date);
+        let reqData = req.params;
+
+        let sd = new Date(reqData.start_date);
+        let ed = new Date (reqData.end_date);
 
         let dsd = sd.getDate()+sd.getMonth()+sd.getFullYear();
         let ded = ed.getDate()+ed.getMonth()+ed.getFullYear();
 
         let data = {
-            "appointment_type": req.body.appointment_type,
-            "appointment_medium": req.body.appointment_medium,
+            "appointment_type": reqData.type,
+            "appointment_medium": reqData.medium,
             "start_date": dsd,
             "end_date": ded
         };
@@ -26,7 +28,7 @@ module.exports = function(app, db){
         let availableCouncellors = [];
 
         db.forEach(i => {
-            let councellor = {}
+            let councellor = {};
 
             if(i.appointment_types.includes(data.appointment_type)){
                 if(i.appointment_mediums.includes(data.appointment_medium)){
@@ -43,15 +45,13 @@ module.exports = function(app, db){
                 }
             }     
         });
-
-        console.log(availableCouncellors);
-        res.send(availableCouncellors);
-    
+        res.send(availableCouncellors);    
     });
 
-    app.post('/add_dates', (req, res)=>{
-        let _id = req.body.id;
-        let dates = req.body.date;
+    app.post('/add_dates/:id/:number/:dates()', (req, res)=>{
+        let reqData = req.params;
+        let _id = reqData.id;
+        let numOfDates = reqData.number;
 
         let councellor = {}
 
@@ -60,7 +60,7 @@ module.exports = function(app, db){
                 councellor.first_name = i.first_name;
                 councellor.last_name = i.last_name;
                 councellor.dates_added = [];
-                dates.forEach(j => {
+                numOfDates.forEach(j => {
                     let time = {
                         "id": `${cryptoRandomString({length: 22})}`,
                         "datetime": j
@@ -70,12 +70,12 @@ module.exports = function(app, db){
                 });
             }
         });
+
         let _db = JSON.stringify(db, null, 2);
         fs.writeFile("./data.json", _db, ()=>{
             console.log("database updated");
         });
         res.send(councellor);
-        
     });
 };
 
