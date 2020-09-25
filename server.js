@@ -1,9 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 
 const app = express();
 
-const database = require('./data.json');
+const database = JSON.parse(fs.readFileSync('./data.json'));
 
 const port = 8000;
 

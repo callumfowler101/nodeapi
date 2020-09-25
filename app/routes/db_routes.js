@@ -1,3 +1,5 @@
+ const fs = require('fs');
+ const cryptoRandomString = require('crypto-random-string')
 
 module.exports = function(app, db){
     app.get('/form', (req, res)=>{
@@ -30,13 +32,13 @@ module.exports = function(app, db){
                 if(i.appointment_mediums.includes(data.appointment_medium)){
                     councellor.first_name = i.first_name;
                     councellor.last_name = i.last_name;
+                    councellor.appointment_type = i.appointment_types;
+                    councellor.appointment_medium = i.appointment_mediums;
                     councellor.dates_available = [];
-
                     i.availability.forEach(j => {
                         let d = new Date(j.datetime);
                         if(dateCheck(d)) councellor.dates_available.push(d);
                     }); 
-
                     if(councellor.dates_available.length>0) availableCouncellors.push(councellor);
                 }
             }     
@@ -47,8 +49,33 @@ module.exports = function(app, db){
     
     });
 
-    app.post('/database', (req, res)=>{
-        // post for councellor to add avaliability
+    app.post('/add_dates', (req, res)=>{
+        let _id = req.body.id;
+        let dates = req.body.date;
+
+        let councellor = {}
+
+        db.forEach(i => {
+            if(_id === i.counsellor_id){
+                councellor.first_name = i.first_name;
+                councellor.last_name = i.last_name;
+                councellor.dates_added = [];
+                dates.forEach(j => {
+                    let time = {
+                        "id": `${cryptoRandomString({length: 22})}`,
+                        "datetime": j
+                    };
+                    i.availability.push(time);
+                    councellor.dates_added.push(j);
+                });
+            }
+        });
+        let _db = JSON.stringify(db, null, 2);
+        fs.writeFile("./data.json", _db, ()=>{
+            console.log("database updated");
+        });
+        res.send(councellor);
+        
     });
 };
 
