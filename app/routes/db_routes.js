@@ -48,10 +48,9 @@ module.exports = function(app, db){
         res.send(availableCouncellors);    
     });
 
-    app.post('/add_dates/:id/:number/:dates()', (req, res)=>{
-        let reqData = req.params;
-        let _id = reqData.id;
-        let numOfDates = reqData.number;
+    app.post('/add_dates', (req, res)=>{
+        let _id = req.body.id;
+        let dates = req.body.date;
 
         let councellor = {}
 
@@ -60,7 +59,7 @@ module.exports = function(app, db){
                 councellor.first_name = i.first_name;
                 councellor.last_name = i.last_name;
                 councellor.dates_added = [];
-                numOfDates.forEach(j => {
+                dates.forEach(j => {
                     let time = {
                         "id": `${cryptoRandomString({length: 22})}`,
                         "datetime": j
