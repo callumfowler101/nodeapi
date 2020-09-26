@@ -35,53 +35,62 @@ module.exports = function(app, db){
         }
 
         // this array will eventually contain all of the possible
-        // councellors that match the query 
-        let availableCouncellors = [];
+        // counsellors that match the query 
+        let availableCounsellors = [];
 
         db.forEach(i => {
-            let councellor = {}; 
+            let counsellor = {}; 
 
             if(i.appointment_types.includes(data.appointment_type)){
                 if(i.appointment_mediums.includes(data.appointment_medium)){
-                    councellor.first_name = i.first_name;
-                    councellor.last_name = i.last_name;
-                    councellor.appointment_type = i.appointment_types;
-                    councellor.appointment_medium = i.appointment_mediums;
-                    councellor.dates_available = [];
+                    counsellor.first_name = i.first_name;
+                    counsellor.last_name = i.last_name;
+                    counsellor.appointment_type = i.appointment_types;
+                    counsellor.appointment_medium = i.appointment_mediums;
+                    counsellor.dates_available = [];
                     i.availability.forEach(j => {
                         let d = new Date(j.datetime);
-                        if(dateCheck(d)) councellor.dates_available.push(d);
+                        if(dateCheck(d)) counsellor.dates_available.push(d);
                     }); 
-                    if(councellor.dates_available.length>0) availableCouncellors.push(councellor);
+                    if(counsellor.dates_available.length>0) availableCounsellors.push(counsellor);
                 }
             }     
         });
-        // the list of avaliable councellors is sent back as a reponse
+        // the list of avaliable counsellors is sent back as a reponse
         // to the query.
-        res.send(availableCouncellors);    
+        res.send(availableCounsellors);    
     });
 
     // the POST request's body is queried to generate the response.
     app.post('/add_dates', (req, res)=>{
         let _id = req.body.id; 
-        let dates = req.body.date; // each item with the "date" key is placed in an array called dates.
+        let dates = req.body.date; // if there are multiple items with the "date" key the values are placed into an array.
 
-        let councellor = {}
-
+        let counsellor = {}
+        
         db.forEach(i => {
             if(_id === i.counsellor_id){
-                councellor.first_name = i.first_name;
-                councellor.last_name = i.last_name;
-                councellor.dates_added = [];
-                dates.forEach(j => {
-                    // the time object is structured to match other entries in the data base.
+                counsellor.first_name = i.first_name;
+                counsellor.last_name = i.last_name;
+                counsellor.dates_added = [];
+                if(Array.isArray(dates)){ // dates is queried if it is an array or not
+                    dates.forEach(j => {
+                        // the time object is structured to match other entries in the data base.
+                        let time = {
+                            "id": `${cryptoRandomString({length: 22})}`, // cryptoRandomString is used to generate a unique id for this session.
+                            "datetime": j // the user can input any data which matches the ISO8601 timecode.
+                        };
+                        i.availability.push(time);
+                        counsellor.dates_added.push(j);
+                    });
+                } else {
                     let time = {
-                        "id": `${cryptoRandomString({length: 22})}`, // cryptoRandomString is used to generate a unique id for this session.
-                        "datetime": j // the user can input any data which matches the ISO8601 timecode.
+                        "id": `${cryptoRandomString({length: 22})}`, 
+                        "datetime": dates 
                     };
                     i.availability.push(time);
-                    councellor.dates_added.push(j);
-                });
+                    counsellor.dates_added.push(dates);
+                }
             }
         });
         // the database is reformatted before being rewritten with the new data.
@@ -90,8 +99,8 @@ module.exports = function(app, db){
             console.log("database updated");
         });
         // the details of the change are sent as a response.
-        // it returns the councellors name and the dates they added.
-        res.send(councellor);
+        // it returns the counsellors name and the dates they added.
+        res.send(counsellor);
     });
 };
 
