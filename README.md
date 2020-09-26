@@ -22,7 +22,7 @@ This repo demonstrates a Node.JS API with POST and GET requests.
 ## POST Request ##
 - The POST request makes use of x-www-form-urlencoded to allow the counsellor to add multiple availability dates.
 - The counsellor's ID is queried as it is unique to specific cousellor. If there were two counsellors with the same name then querying the id would resolve any confusion.
-- The POST request returns a conformation JSON showing what dates have been added.
+- The POST request returns a confirmation JSON showing what dates have been added.
 
 *See the code for more comments*
 
