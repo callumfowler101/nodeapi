@@ -18,6 +18,7 @@ This repo demonstrates a Node.JS API with POST and GET requests.
 ## GET Request ##
 - The GET request can be queried via the HTML using url parameters.
 - The code evaluates the parameters and returns available counsellors and their times.
+- Time are inputted and displayed in the ISO8601 format. In the app they are all converted into milliseconds since UNIX Epoch to correctly filter relevant dates.
 
 ## POST Request ##
 - The POST request makes use of x-www-form-urlencoded to allow the counsellor to add multiple availability dates.
