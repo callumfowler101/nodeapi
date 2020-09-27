@@ -25,8 +25,6 @@ module.exports = function(app, db){
             "end_date": endDate.getTime()
         };
 
-        console.log(data);
-
         // dateCheck() checks if a given date falls between the two 
         // dates queried.
         function dateCheck(date){
@@ -59,7 +57,13 @@ module.exports = function(app, db){
         });
         // the list of avaliable counsellors is sent back as a reponse
         // to the query.
-        res.send(availableCounsellors);    
+        if(availableCounsellors.length>0){
+            res.send(availableCounsellors); 
+        } else {
+            let msg = "No counsellors found. Please check the information and try again."
+            res.send(msg);
+        }
+           
     });
 
     // the POST request's body is queried to generate the response.
@@ -98,10 +102,10 @@ module.exports = function(app, db){
         let _db = JSON.stringify(db, null, 2); 
         fs.writeFile("./data.json", _db, ()=>{
             console.log("database updated");
+            // the details of the change are sent as a response.
+            // it returns the counsellors name and the dates they added.
+            res.send(counsellor);
         });
-        // the details of the change are sent as a response.
-        // it returns the counsellors name and the dates they added.
-        res.send(counsellor);
     });
 };
 
